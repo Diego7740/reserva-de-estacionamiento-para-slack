@@ -1,1 +1,292 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Reserva de Estacionamiento | ROBOTIA</title>
 
+  <!-- FullCalendar -->
+  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    :root {
+      --robotia-blue: #1e40ff;
+      --robotia-blue-dark: #1632cc;
+      --bg: #f3f6fb;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: var(--bg);
+    }
+
+    /* ================= HEADER ================= */
+    header {
+      background: #000;
+      border-bottom: 4px solid var(--robotia-blue);
+      padding: 12px 20px;
+    }
+
+    .header-grid {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+    }
+
+    .logo img {
+      height: 36px;
+    }
+
+    .titulo-centro {
+      text-align: center;
+    }
+
+    .titulo-centro h1 {
+      margin: 0;
+      color: #fff;
+      font-size: 22px;
+    }
+
+    .titulo-centro p {
+      margin: 4px 0 0;
+      font-size: 14px;
+      color: #fff;
+    }
+
+    .hora {
+      text-align: right;
+      font-weight: bold;
+      color: #fff;
+    }
+
+    /* ================= CONTENEDOR ================= */
+    .contenedor {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 14px;
+      max-width: 1450px;
+      margin: 25px auto 0;
+      padding: 0 20px 20px;
+    }
+
+    .calendar {
+      background: #fff;
+      border-radius: 8px;
+      padding: 8px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    }
+
+    .titulo {
+      text-align: center;
+      font-weight: bold;
+      margin: 6px 0 10px;
+      color: var(--robotia-blue);
+    }
+
+    /* 🔵 Texto de los bloques/calendarios */
+    .calendar,
+    .calendar * {
+      color: var(--robotia-blue);
+    }
+
+    /* ================= FULLCALENDAR ================= */
+    .fc {
+      font-size: 12px;
+    }
+
+    .fc-timegrid-slot,
+    .fc-timegrid-slot-lane {
+      background: #fff !important;
+    }
+
+    .fc-event {
+      background-color: var(--robotia-blue) !important;
+      border: none !important;
+      border-radius: 6px !important;
+      font-size: 12px;
+      padding: 2px 4px;
+      position: relative;
+      color: #fff !important;
+    }
+
+    .fc-event::after {
+      content: "● OCUPADO";
+      position: absolute;
+      top: 2px;
+      right: 4px;
+      font-size: 9px;
+      font-weight: bold;
+      color: #fff;
+    }
+
+    /* ================= 📱 MOBILE ================= */
+    @media (max-width: 768px) {
+
+      header {
+        padding: 10px;
+      }
+
+      .header-grid {
+        grid-template-columns: 1fr;
+        gap: 8px;
+        text-align: center;
+      }
+
+      .hora {
+        text-align: center;
+      }
+
+      .contenedor {
+        grid-template-columns: 1fr;
+        gap: 16px;
+        padding: 10px;
+      }
+
+      .calendar {
+        padding: 10px;
+      }
+
+      .titulo {
+        font-size: 18px;
+        margin: 12px 0;
+      }
+
+      .fc {
+        font-size: 14px;
+      }
+
+      .fc-timegrid-slot {
+        height: 46px;
+      }
+
+      .fc-event {
+        font-size: 13px;
+        padding: 4px 6px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <div class="header-grid">
+    <div class="logo">
+      <img src="logo-robotia.png" alt="ROBOTIA">
+    </div>
+
+    <div class="titulo-centro">
+      <h1>Reserva de Estacionamiento</h1>
+      <p id="fecha"></p>
+    </div>
+
+    <div class="hora" id="hora"></div>
+  </div>
+</header>
+
+<div class="contenedor">
+  <div class="calendar"><div class="titulo">Estacionamiento 1</div><div id="cal1"></div></div>
+  <div class="calendar"><div class="titulo">Estacionamiento 2</div><div id="cal2"></div></div>
+  <div class="calendar"><div class="titulo">Estacionamiento 3</div><div id="cal3"></div></div>
+  <div class="calendar"><div class="titulo">Estacionamiento 4</div><div id="cal4"></div></div>
+  <div class="calendar"><div class="titulo">Estacionamiento 5</div><div id="cal5"></div></div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+  const fechaEl = document.getElementById('fecha');
+  const horaEl = document.getElementById('hora');
+
+  function actualizarHora() {
+    const ahora = new Date();
+    fechaEl.textContent = ahora.toLocaleDateString('es-CL', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+    horaEl.textContent = ahora.toLocaleTimeString('es-CL');
+  }
+
+  actualizarHora();
+  setInterval(actualizarHora, 1000);
+
+  function hayCruce(calendar, inicio, fin) {
+    return calendar.getEvents().some(ev =>
+      inicio < ev.end && fin > ev.start
+    );
+  }
+
+  function crearCalendario(id, estacionamiento) {
+    const calendar = new FullCalendar.Calendar(
+      document.getElementById(id),
+      {
+        initialView: 'timeGridDay',
+        locale: 'es',
+        allDaySlot: false,
+        height: 'auto',
+        expandRows: true,
+        selectable: true,
+
+        slotMinTime: '08:00:00',
+        slotMaxTime: '19:00:00',
+        slotDuration: '00:30:00',
+        snapDuration: '00:30:00',
+
+        headerToolbar: false,
+        dayHeaderContent: () => '',
+
+        events: `/reservas?estacionamiento=${estacionamiento}`,
+
+        select: function(info) {
+          if (hayCruce(calendar, info.start, info.end)) {
+            alert('Horario ocupado');
+            calendar.unselect();
+            return;
+          }
+
+          const nombre = prompt('Nombre de la reserva:');
+          if (!nombre) return calendar.unselect();
+
+          guardarReserva(calendar, estacionamiento, nombre, info.start, info.end);
+        },
+
+        eventClick: function(info) {
+          if (!confirm('¿Eliminar esta reserva?')) return;
+          fetch(`/reservas/${info.event.id}`, { method: 'DELETE' })
+            .then(() => info.event.remove());
+        }
+      }
+    );
+
+    calendar.render();
+  }
+
+  function guardarReserva(calendar, estacionamiento, nombre, inicio, fin) {
+    fetch('/reservas', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title: nombre, start: inicio, end: fin, estacionamiento })
+    })
+    .then(res => {
+      if (!res.ok) throw new Error();
+      return res.json();
+    })
+    .then(data => calendar.addEvent(data))
+    .catch(() => alert('No se pudo guardar'));
+  }
+
+  crearCalendario('cal1', 1);
+  crearCalendario('cal2', 2);
+  crearCalendario('cal3', 3);
+  crearCalendario('cal4', 4);
+  crearCalendario('cal5', 5);
+});
+</script>
+
+</body>
+</html>
