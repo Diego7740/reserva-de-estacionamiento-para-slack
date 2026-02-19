@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Reserva de Estacionamiento | ROBOTIA</title>
+  <title>Reserva de Estacionamiento | NOMBRE DE LA EMPRESA</title>
 
   <!-- FullCalendar -->
   <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css" rel="stylesheet">
@@ -191,6 +191,51 @@
         padding: 4px 6px;
       }
     }
+    /*=========== MOBILE ===========*/
+    @media (max-width: 768px) {
+
+      header {
+        padding: 10px;
+      }
+
+      .header-grid {
+        grid-template-columns: 1fr;
+        gap: 8px;
+        text-alig: center;
+      }
+
+      .hora {
+        text-align: left;
+      }
+
+      .contenedor {
+        grid-template-colums: 1fr;
+        gap: 16px;
+        padding: 10px;
+      }
+
+      .calendar {
+        padding: 10px;
+      }
+
+      .titulo {
+        font-size: 18px;
+        margin: 12px 0;
+      }
+
+      .fc {
+        font-size: 14px;
+      }
+
+      .fc-timegrid-slot {
+        height: 46px;
+      }
+
+      .fc-event {
+        font-size: 13px;
+        padding: 4px 6px;
+      }
+    }
   </style>
 </head>
 
@@ -199,7 +244,7 @@
 <main id="loginView" class="login-overlay">
   <form id="loginForm" class="login-card">
     <h2>Iniciar sesión</h2>
-    <p>Ingresa tus credenciales para entrar al sistema de reservas de ROBOTIA.</p>
+    <p>Ingresa tus credenciales para entrar al sistema de reservas de (NOMBRE DE LA EMPRESA).</p>
 
     <div class="login-field">
       <label for="username">Usuario</label>
